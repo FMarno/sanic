@@ -22,6 +22,15 @@ struct Plus : public Token {
 struct Minus : public Token {
   std::string toString() const override { return "-"; }
 };
+struct Multiply : public Token {
+  std::string toString() const override { return "*"; }
+};
+struct Divide : public Token {
+  std::string toString() const override { return "/"; }
+};
+struct Modulus : public Token {
+  std::string toString() const override { return "%"; }
+};
 struct I : public Token {
   int value;
   I(int v) : value(v){};
@@ -29,6 +38,8 @@ struct I : public Token {
     return "I(" + std::to_string(value) + ")";
   }
 };
+
+int readInt(std::deque<char> &line, char head);
 
 std::optional<std::unique_ptr<Token>> nextToken(std::deque<char> &line) {
   if (line.empty()) {
@@ -52,8 +63,27 @@ std::optional<std::unique_ptr<Token>> nextToken(std::deque<char> &line) {
     return std::make_unique<Plus>();
   case '-':
     return std::make_unique<Minus>();
+  case '*':
+    return std::make_unique<Multiply>();
+  case '/':
+    return std::make_unique<Divide>();
+  case '%':
+    return std::make_unique<Modulus>();
   }
-  return std::make_unique<I>(c - '0');
+  if (std::isdigit(c)) {
+    return std::make_unique<I>(readInt(line, c));
+  }
+  throw std::invalid_argument(std::string{c});
+}
+
+int readInt(std::deque<char> &line, char head) {
+  std::string num{head};
+  while (!line.empty() && std::isdigit(line.front())) {
+    char next = line.front();
+    line.pop_front();
+    num += next;
+  }
+  return std::stoi(num);
 }
 
 std::deque<std::unique_ptr<Token>> tokenise(std::deque<char> line) {
